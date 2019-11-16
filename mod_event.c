@@ -87,8 +87,13 @@ static int event_handler(request_rec *r) {
     event_config *config = (event_config *) ap_get_module_config(r->per_dir_config, &event_module);
 
     if (config->enabled) {
+        // executable + args + 3 spaces between them + trailing NULL
+        int size = strlen(config->executable) + strlen(r->method) + strlen(r->hostname) + strlen(r->unparsed_uri) + 3;
+        char *path = apr_palloc(r->pool, size);
+        snprintf(path, size, "%s %s %s %s", config->executable, r->method, r->hostname, r->unparsed_uri);
+
         FILE *fp;
-        fp = popen(config->executable, "r");
+        fp = popen(path, "r");
         if (fp == NULL) {
             ap_log_error(APLOG_MARK, APLOG_WARNING, 0, r->server, APLOGNO(00100)
                          "unable to open %s", (const char*) config->executable);
