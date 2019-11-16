@@ -31,12 +31,12 @@ module AP_MODULE_DECLARE_DATA
         event_module =
         {
                 STANDARD20_MODULE_STUFF,
-                create_dir_conf,            // Per-directory configuration handler
+                create_dir_conf,           // Per-directory configuration handler
                 merge_dir_conf,            // Merge handler for per-directory configurations
-                NULL,            // Per-server configuration handler
-                NULL,            // Merge handler for per-server configurations
-                event_directives,            // Any directives we may have for httpd
-                register_hooks   // Our hook registering function
+                NULL,                      // Per-server configuration handler
+                NULL,                      // Merge handler for per-server configurations
+                event_directives,          // Any directives we may have for httpd
+                register_hooks             // Our hook registering function
         };
 
 const char *event_set_executable(cmd_parms *cmd, void *cfg, const char *arg) {
@@ -84,19 +84,19 @@ static void register_hooks(apr_pool_t *pool) {
 }
 
 static int event_handler(request_rec *r) {
-    event_config *config = (event_config *) ap_get_module_config(r->per_dir_config, &event_module);
+    event_config *conf = (event_config *) ap_get_module_config(r->per_dir_config, &event_module);
 
-    if (config->enabled) {
+    if (conf->enabled) {
         // executable + args + 3 spaces between them + trailing NULL
-        int size = strlen(config->executable) + strlen(r->method) + strlen(r->hostname) + strlen(r->unparsed_uri) + 3;
+        int size = strlen(conf->executable) + strlen(r->method) + strlen(r->hostname) + strlen(r->unparsed_uri) + 3;
         char *path = apr_palloc(r->pool, size);
-        snprintf(path, size, "%s %s %s %s", config->executable, r->method, r->hostname, r->unparsed_uri);
+        snprintf(path, size, "%s %s %s %s", conf->executable, r->method, r->hostname, r->unparsed_uri);
 
         FILE *fp;
         fp = popen(path, "r");
         if (fp == NULL) {
             ap_log_error(APLOG_MARK, APLOG_WARNING, 0, r->server, APLOGNO(00100)
-                         "unable to open %s", (const char*) config->executable);
+                    "unable to open %s", (const char *) conf->executable);
         }
         if (errno) {
             char path[PATH_MAX];
@@ -104,7 +104,7 @@ static int event_handler(request_rec *r) {
             if (fgets(path, PATH_MAX, fp) != NULL) {
                 char *errstr = strerror(errno);
                 ap_log_error(APLOG_MARK, APLOG_WARNING, 0, r->server, APLOGNO(00200)
-                             "error while executing %s: %s, output: %s", config->executable, errstr, path);
+                        "error while executing %s: %s, output: %s", conf->executable, errstr, path);
             }
         }
 
@@ -112,7 +112,7 @@ static int event_handler(request_rec *r) {
         status = pclose(fp);
         if (status == -1) {
             ap_log_error(APLOG_MARK, APLOG_WARNING, 0, r->server, APLOGNO(00101)
-                         "unable to close %s", config->executable);
+                    "unable to close %s", conf->executable);
         }
     }
 
