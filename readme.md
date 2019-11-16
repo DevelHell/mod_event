@@ -1,9 +1,9 @@
-`mod_event` is module for apache2 web server which triggers external command in given Location section. 
+`mod_event` is module for apache2 web server which triggers external command. 
 It allows to trigger specific events based on HTTP method and URL, e.g. email alert, detect attacs etc.
 
 # Development
 
-To build and enable module run:
+To build and enable the module run:
 
 `apxs -i -a -c mod_event.c`
 
