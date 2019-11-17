@@ -88,7 +88,7 @@ static int event_handler(request_rec *r) {
 
     if (conf->enabled) {
         // executable + args + 3 spaces between them + trailing NULL
-        int size = strlen(conf->executable) + strlen(r->method) + strlen(r->hostname) + strlen(r->unparsed_uri) + 3;
+        int size = strlen(conf->executable) + strlen(r->method) + strlen(r->hostname) + strlen(r->unparsed_uri) + 4;
         char *path = apr_palloc(r->pool, size);
         snprintf(path, size, "%s %s %s %s", conf->executable, r->method, r->hostname, r->unparsed_uri);
 
